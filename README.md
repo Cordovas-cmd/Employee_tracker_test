@@ -20,10 +20,9 @@ This CLI app uses Node.js, Inquirer, and MySQL so you will need to install all o
 **Project setup**
 - Clone down this repository locally
 `git clonegit@github.com:westgards/employee_tracker.git`
-- Run the following commands in your project terminal
-  - `npm init`
-  - `npm install`
-  - `npm i inquirer@8.2.4`
+You will need to instal
+  - `nvm`
+  - `npm`
 
 **Use the below command to run the CLI app locally**
 `node server.js`
