@@ -62,7 +62,6 @@ function promptUser() {
 }
 
 function viewRoles() {
-  console.log("I view roles");
   let sql = `
     SELECT
       role.id,
@@ -85,7 +84,6 @@ function viewRoles() {
 
 // viewDepts function will display a table of all the departments
 function viewDepts() {
-  console.log("I view departments");
   let sql = `
   SELECT
     id,
@@ -104,7 +102,6 @@ function viewDepts() {
 }
 
 function viewEmployees() {
-  console.log("I view employees ");
   let sql = `
     SELECT
       employee.id,
@@ -135,7 +132,6 @@ function viewEmployees() {
 // add addDept function will take in userInput to add a department
 // to the department table
 function addDept() {
-  console.log("I add a department ");
   inquirer
     .prompt([
       {
@@ -161,11 +157,69 @@ function addDept() {
       });
     });
 }
-
+// addRole function will take in userInput about an employee, their salary and the role they want to add to the role table
 function addRole() {
-  console.log("I add a role ");
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What is the name of the role you would like to add?",
+        name: "addNewRole",
+      },
+      {
+        type: "input",
+        message: "In USD what is the salary for this role?",
+        name: "addSalaryToRole",
+      },
+    ])
+    .then(function (data) {
+      let typedInputs = [data.addNewRole, data.addSalaryToRole];
+      // sql to list departments for user to choose
+      let sql = `
+        SELECT
+        id,
+        name
+        FROM department
+        `;
+      db.query(sql, (err, results) => {
+        if (err) throw err;
+        // listDepts results from sql query to present list of depts to user
+        let listDepts = results.map(({ id, name }) => ({
+          name: name,
+          value: id,
+        }));
 
-  promptUser();
+        inquirer
+          .prompt([
+            {
+              type: "list",
+              message: "In what department do you want to add this role?",
+              name: "addRoleToDept",
+              choices: listDepts,
+            },
+          ])
+          .then(function (data) {
+            let deptInfo = data.addRoleToDept;
+            typedInputs.push(deptInfo);
+
+            let sql = `
+                INSERT INTO role(
+                    title,
+                    salary, 
+                    department_id)
+                VALUES(?,?,?)
+                    `;
+
+            db.query(sql, typedInputs, (err) => {
+              if (err) throw err;
+
+              console.log("Role added!");
+
+              promptUser();
+            });
+          });
+      });
+    });
 }
 
 function addEmployee() {
