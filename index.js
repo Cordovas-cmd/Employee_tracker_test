@@ -132,10 +132,34 @@ function viewEmployees() {
   });
 }
 
+// add addDept function will take in userInput to add a department
+// to the department table
 function addDept() {
   console.log("I add a department ");
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What is the name of the Department you want to add?",
+        name: "addNewDept",
+      },
+    ])
+    .then(function (data) {
+      let typedInput = [data.addNewDept];
 
-  promptUser();
+      // sql statement for adding to department (?) is a placeholder
+      let sql = `
+    INSERT INTO department(name)
+        VALUES(?)`;
+
+      db.query(sql, typedInput, (err) => {
+        if (err) throw err;
+
+        console.log(`Added ${typedInput} as a new department!`);
+
+        promptUser();
+      });
+    });
 }
 
 function addRole() {
