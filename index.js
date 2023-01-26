@@ -62,20 +62,74 @@ function promptUser() {
 }
 
 function viewRoles() {
-  console.log("i view roles");
-  promptUser();
+  console.log("I view roles");
+  let sql = `
+    SELECT
+      role.id,
+      title,
+      department.name,
+      salary
+    FROM role
+    LEFT JOIN department
+      ON role.department_id=department.id
+  ;`;
+
+  db.query(sql, (err, results) => {
+    if (err) throw err;
+
+    console.log("\n");
+    console.table(results);
+    promptUser();
+  });
 }
 
+// viewDepts function will display a table of all the departments
 function viewDepts() {
-  console.log("i view departments");
+  console.log("I view departments");
+  let sql = `
+  SELECT
+    id,
+    name
+  FROM department
+;`;
 
-  promptUser();
+  db.query(sql, (err, results) => {
+    if (err) throw err;
+
+    console.log("\n");
+    console.table(results);
+
+    promptUser();
+  });
 }
 
 function viewEmployees() {
   console.log("I view employees ");
+  let sql = `
+    SELECT
+      employee.id,
+      employee.first_name,
+      employee.last_name,
+      CONCAT(manager.first_name, " ",manager.last_name) AS "manager",
+      role.title,
+      role.salary,
+      department.name AS "department"
+    FROM employee
+    LEFT JOIN role 
+        ON employee.role_id=role.id
+    LEFT JOIN department
+      ON role.department_id=department.id
+    LEFT JOIN employee manager
+      ON manager.id=employee.manager_id
+  ;`;
 
-  promptUser();
+  db.query(sql, (err, results) => {
+    if (err) throw err;
+
+    console.log("\n");
+    console.table(results);
+    promptUser();
+  });
 }
 
 function addDept() {
