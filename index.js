@@ -222,16 +222,272 @@ function addRole() {
     });
 }
 
+// addEmployee function will take in userInput about a new employee and add them to the databse
 function addEmployee() {
-  console.log("I add an employee ");
+  inquirer
+    .prompt([
+      {
+        type: "input",
+        message: "What is the new employee's first name?",
+        name: "newEmplFirstName",
+      },
+      {
+        type: "input",
+        message: "What is the new employee's last name?",
+        name: "newEmplLastName",
+      },
+    ])
+    // add role
+    .then(function (userInput) {
+      let data = [userInput.newEmplFirstname, userInput.newEmplLastName];
 
-  promptUser();
+      // sql query to get roles table
+      let sql = `
+      SELECT
+        id,
+        CONCAT(title, ", id: ", id) AS role
+      FROM role
+      ORDER BY role
+      `;
+
+      db.query(sql, (err, results) => {
+        if (err) throw err;
+
+        let listRoles = results.map(({ id, role }) => ({
+          name: role,
+          value: id,
+        }));
+
+        inquirer
+          .prompt([
+            {
+              type: "list",
+              message: "What is the new employee's role?",
+              name: "idForRole",
+              choices: listRoles,
+            },
+          ])
+
+          .then(function (userInput) {
+            let idForRole = userInput.idForRole;
+            console.log(idForRole);
+            data.push(idForRole);
+
+            // sql query to employee list for assigned manager
+            let sql = `
+              SELECT
+                id,
+              CONCAT(first_name, " ", last_name, ", id: ", id) AS name
+            FROM employee
+            ORDER BY name
+          `;
+
+            db.query(sql, (err, results) => {
+              if (err) throw err;
+
+              let mgrList = results.map(({ id, name }) => ({
+                name: name,
+                value: id,
+              }));
+
+              inquirer
+                .prompt([
+                  {
+                    type: "list",
+                    message: "Who is the new employee's manager?",
+                    name: "mgrId",
+                    choices: mgrList,
+                  },
+                ])
+                .then(function (userInput) {
+                  console.log("mrgId");
+                  let mgrId = userInput.mgrId;
+                  data.push(mgrId);
+
+                  // sql to add new employee to the database
+                  let sql = `
+                    INSERT INTO employee (
+                      first_name,
+                      last_name,
+                      role_id,
+                      manager_id
+                    )
+                    VALUES(?, ?, ?, ?)
+                  `;
+
+                  db.query(sql, data, (err) => {
+                    if (err) throw err;
+
+                    console.log(`Added ${data[0]} ${data[1]} to the database!`);
+                    promptUser();
+                  });
+                });
+            });
+          });
+      });
+    });
 }
 
-function updateRole() {
-  console.log("I update a role ");
+// updateEmpManager function will take in userInput about an existing employee and update the manager assigned in the database
+function updateEmpManager() {
+  // get a list of employees
+  let sql = `
+    SELECT
+      id,
+      CONCAT(first_name, " ", last_name, ", id: ", id) AS name
+    FROM employees
+    ORDER BY name
+  `;
 
-  promptUser();
+  db.query(sql, (err, results) => {
+    if (err) throw err;
+
+    let empList = results.map(({ id, name }) => ({
+      name: name,
+      value: id,
+    }));
+
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: "Which Employee's manager do you want to update?",
+          name: "employeeId",
+          choices: empList,
+        },
+      ])
+      .then(function (userInput) {
+        let data = [userInput.employeeId];
+
+        // get a list of employees (managers)
+        let sql = `
+          SELECT
+            id,
+            CONCAT(first_name, " ", last_name, ", id: ", id) AS name
+          FROM employees
+          ORDER BY name
+        `;
+
+        db.query(sql, (err, results) => {
+          if (err) throw err;
+
+          let mgrList = results.map(({ id, name }) => ({
+            name: name,
+            value: id,
+          }));
+
+          inquirer
+            .prompt([
+              {
+                type: "list",
+                message: "Who is the employee's manager?",
+                name: "managerId",
+                choices: mrgList,
+              },
+            ])
+            .then(function (userInput) {
+              let managerId = userInput.managerId;
+              data.push(managerId);
+
+              // update the manager for the selected employee
+              let sql = `
+              UPDATE employees
+              SET employees.manager_id = ?
+              WHERE employees.id = ?
+            `;
+              // reverse the array to match the order needed for the UPDATE statement
+              db.query(sql, data.reverse(), (err) => {
+                if (err) throw err;
+
+                console.log("Updated employee's manager");
+
+                begin();
+              });
+            });
+        });
+      });
+  });
+}
+
+// updateRole function will take in userInput about an existing employee and update them in the database
+function updateRole() {
+  let sql = `
+    SELECT
+      id,
+      CONCAT(first_name, " ", last_name, ", id: ", id) AS name
+    FROM employee
+    ORDER BY name
+    `;
+
+  db.query(sql, (err, results) => {
+    if (err) throw err;
+
+    let empList = results.map(({ id, name }) => ({
+      name: name,
+      value: id,
+    }));
+
+    inquirer
+      .prompt([
+        {
+          type: "list",
+          message: "Which employee do you want to update?",
+          name: "empId",
+          choices: empList,
+        },
+      ])
+      .then(function (userInput) {
+        let data = [userInput.empId];
+
+        let sql = `
+          SELECT
+            id,
+            CONCAT(title, ",id: ", id) AS role
+          FROM role
+          ORDER BY role
+          `;
+
+        db.query(sql, (err, results) => {
+          if (err) throw err;
+
+          let listRoles = results.map(({ id, role }) => ({
+            name: role,
+            value: id,
+          }));
+
+          inquirer
+            .prompt([
+              {
+                type: "list",
+                message:
+                  "Which role do you want to assign to the chosen employee?",
+                name: "roleId",
+                choices: listRoles,
+              },
+            ])
+            .then(function (userInput) {
+              let roleId = userInput.roleId;
+              data.push(roleId);
+
+              /// selected employee is updated in database
+              let sql = `
+              UPDATE employee
+              SET employee.role_id = ?
+              WHERE employee.id = ?
+              `;
+
+              // mimic the order of the array to update properly
+              db.query(sql, data.reverse(), (err) => {
+                if (err) throw err;
+
+                console.log("Employee's role Updated!");
+
+                promptUser();
+              });
+            });
+        });
+      });
+  });
 }
 
 function exit() {
