@@ -38,6 +38,13 @@ This CLI app uses Node.js, Inquirer, and MySQL so you will need to install all o
 - Command Line Application that takes in employee information
 - Asynchonous query calls to MySQL database
 
+## Demo Video
+Short clip of the demo!
+
+
+https://user-images.githubusercontent.com/87400584/215019822-94cb6fd0-7662-4b96-be94-e74f6d321527.mov
+
+
 ## Credits
 
 Tutorials:
