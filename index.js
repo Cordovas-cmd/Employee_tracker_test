@@ -239,7 +239,7 @@ function addEmployee() {
     ])
     // add role
     .then(function (userInput) {
-      let data = [userInput.newEmplFirstname, userInput.newEmplLastName];
+      let data = [userInput.newEmplFirstName, userInput.newEmplLastName];
 
       // sql query to get roles table
       let sql = `
