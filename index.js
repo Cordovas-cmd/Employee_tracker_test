@@ -29,8 +29,8 @@ function promptUser() {
           "Add an Employee",
           "Update an Employee Role",
           "Quit",
-        ],
-      },
+        ]
+      }
     ])
     .then(function (userInput) {
       switch (userInput.options) {
